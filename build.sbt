@@ -5,7 +5,7 @@ def base(project: Project): Project = project.settings(
   bintrayOrganization := Some("daonomic"),
   bintrayPackageLabels := Seq("daonomic", "blockchain", "listener", "bitcoin", "ethereum"),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
-  version := "0.1.1",
+  version := "0.1.2",
   scalaVersion := Versions.scala
 )
 
@@ -21,6 +21,11 @@ lazy val listener = common(project)
 lazy val `listener-mono` = common(project)
   .dependsOn(listener)
 
+lazy val poller = common(project)
+
+lazy val `poller-mono` = common(project)
+  .dependsOn(poller)
+
 lazy val root = base(project in file("."))
   .settings(publish := {})
-  .aggregate(listener, `listener-mono`)
+  .aggregate(listener, `listener-mono`, poller, `poller-mono`)
