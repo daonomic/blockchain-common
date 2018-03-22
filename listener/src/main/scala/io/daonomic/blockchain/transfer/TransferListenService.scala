@@ -18,11 +18,11 @@ class TransferListenService[F[_]](blockchain: Blockchain[F], confidence: Int, li
     blockchain.getTransactionsByBlock(block).flatMap(notifyListenerAboutTransfers(latestBlock, block))
 
   private def notifyListenerAboutTransfers(latestBlock: BigInteger, block: BigInteger)(transactions: List[Transaction]): F[Unit] = {
-    Notify.every(transactions)(notifyTransaction(latestBlock))
+    Notify.every(transactions)(notifyTransaction(latestBlock, block))
   }
 
-  private def notifyTransaction(latestBlock: BigInteger)(tx: Transaction): F[Unit] = {
-    val confirmations = latestBlock.subtract(tx.blockNumber).intValue() + 1
+  private def notifyTransaction(latestBlock: BigInteger, block: BigInteger)(tx: Transaction): F[Unit] = {
+    val confirmations = latestBlock.subtract(block).intValue() + 1
     Notify.every(tx.outputs.zipWithIndex)(notifyTransactionOutput(tx, confirmations, TransferDirection.IN))
   }
 
