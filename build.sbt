@@ -5,7 +5,7 @@ def base(project: Project): Project = project.settings(
   bintrayOrganization := Some("daonomic"),
   bintrayPackageLabels := Seq("daonomic", "blockchain", "listener", "bitcoin", "ethereum"),
   licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
-  version := "0.1.4",
+  version := "0.1.3",
   scalaVersion := Versions.scala
 )
 
