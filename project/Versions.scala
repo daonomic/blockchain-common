@@ -4,7 +4,7 @@ object Versions {
   val scalacheck = "1.13.5"
   val mockito = "1.10.19"
   val cats = "1.1.0"
-  val catsMono = "0.1.0"
+  val catsMono = "0.1.1"
 }
 
 
