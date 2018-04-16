@@ -25,18 +25,19 @@ abstract class AbstractListenService[F[_]](confidence: Int, state: State[BigInte
     val from = saved.getOrElse(blockNumber.subtract(BigInteger.ONE))
     val start = from.subtract(BigInteger.valueOf(confidence - 1))
     val numbers = blockNumbers(start, blockNumber)
+    logger.info(s"will fetchAndNotify blocks: $numbers")
     Notify.every(numbers) { num =>
-      fetchAndNotify(blockNumber)(num).flatMap(_ => state.set(num))
+      fetchAndNotify(blockNumber)(num.bigInteger).flatMap(_ => state.set(num.bigInteger))
     }
   }
 
-  private def blockNumbers(from: BigInteger, to: BigInteger): TraversableOnce[BigInteger] = {
+  private def blockNumbers(from: BigInteger, to: BigInteger): Seq[BigInt] = {
     if (from.compareTo(to) >= 0)
       Nil
     else if (from.compareTo(BigInteger.ZERO) < 0)
-      (BigInt(BigInteger.ZERO) to to).map(_.bigInteger)
+      BigInt(BigInteger.ZERO) to to
     else
-      (BigInt(from) to to).map(_.bigInteger)
+      BigInt(from) to to
   }
 
   protected def fetchAndNotify(latestBlock: BigInteger)(block: BigInteger): F[Unit]
