@@ -21,8 +21,9 @@ class BlockListenServiceSpec extends FlatSpec with MockitoSugar {
     testing.check().get
 
     verify(state).set(BigInteger.TEN)
+    verify(state, atLeastOnce()).get
     verify(listener).onBlock(BigInteger.TEN)
-    verifyAfter(blockchain, listener)
+    verifyAfter(blockchain, listener, state)
   }
 
   it should "notify if block is changed" in {
@@ -33,8 +34,9 @@ class BlockListenServiceSpec extends FlatSpec with MockitoSugar {
     testing.check().get
 
     verify(state).set(BigInteger.TEN)
+    verify(state, atLeastOnce()).get
     verify(listener).onBlock(BigInteger.TEN)
-    verifyAfter(blockchain, listener)
+    verifyAfter(blockchain, listener, state)
   }
 
   it should "not notify if block is the same" in {
@@ -43,7 +45,8 @@ class BlockListenServiceSpec extends FlatSpec with MockitoSugar {
     val testing = new BlockListenService[Try](blockchain, listener, state)
     testing.check().get
 
-    verifyAfter(blockchain, listener)
+    verify(state, atLeastOnce()).get
+    verifyAfter(blockchain, listener, state)
   }
 
   private def prepare(stateValue: Option[BigInteger], blockNumber: BigInteger) = {
@@ -56,8 +59,8 @@ class BlockListenServiceSpec extends FlatSpec with MockitoSugar {
     (state, blockchain, listener)
   }
 
-  private def verifyAfter(blockchain: Blockchain[Try], listener: BlockListener[Try]): Unit = {
+  private def verifyAfter(blockchain: Blockchain[Try], listener: BlockListener[Try], state: State[BigInteger, Try]): Unit = {
     verify(blockchain).blockNumber
-    verifyNoMoreInteractions(blockchain, listener)
+    verifyNoMoreInteractions(blockchain, listener, state)
   }
 }

@@ -14,14 +14,15 @@ abstract class AbstractListenService[F[_]](confidence: Int, state: State[BigInte
   def check(blockNumber: BigInteger): F[Unit] = for {
     saved <- state.get
     _ <- fetchAndNotify(blockNumber, saved)
-    _ <- state.set(blockNumber)
   } yield ()
 
   private def fetchAndNotify(blockNumber: BigInteger, saved: Option[BigInteger]): F[Unit] = {
     val from = saved.getOrElse(blockNumber.subtract(BigInteger.ONE))
     val start = from.subtract(BigInteger.valueOf(confidence - 1))
     val numbers = blockNumbers(start, blockNumber)
-    Notify.every(numbers)(fetchAndNotify(blockNumber))
+    Notify.every(numbers) { num =>
+      fetchAndNotify(blockNumber)(num).flatMap(_ => state.set(num))
+    }
   }
 
   private def blockNumbers(from: BigInteger, to: BigInteger): TraversableOnce[BigInteger] = {
