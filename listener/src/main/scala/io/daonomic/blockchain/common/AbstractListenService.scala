@@ -24,15 +24,13 @@ abstract class AbstractListenService[F[_]](confidence: Int, state: State[BigInte
     Notify.every(numbers)(fetchAndNotify(blockNumber))
   }
 
-  private def blockNumbers(from: BigInteger, to: BigInteger): List[BigInteger] = {
+  private def blockNumbers(from: BigInteger, to: BigInteger): TraversableOnce[BigInteger] = {
     if (from.compareTo(to) >= 0)
       Nil
-    else if (to.subtract(from).compareTo(BigInteger.TEN.pow(3)) >= 0)
-      throw new IllegalArgumentException("unable to process more than 1000 blocks")
     else if (from.compareTo(BigInteger.ZERO) < 0)
-      blockNumbers(from.add(BigInteger.ONE), to)
+      (BigInt(BigInteger.ZERO) to to).map(_.bigInteger)
     else
-      from.add(BigInteger.ONE) :: blockNumbers(from.add(BigInteger.ONE), to)
+      (BigInt(from) to to).map(_.bigInteger)
   }
 
   protected def fetchAndNotify(latestBlock: BigInteger)(block: BigInteger): F[Unit]
