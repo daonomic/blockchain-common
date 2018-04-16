@@ -5,6 +5,7 @@ object Versions {
   val mockito = "1.10.19"
   val cats = "1.1.0"
   val catsMono = "0.1.0"
+  val slf4j = "1.7.25"
 }
 
 

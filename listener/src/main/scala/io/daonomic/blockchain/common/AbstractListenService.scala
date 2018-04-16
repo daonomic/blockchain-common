@@ -6,17 +6,22 @@ import cats.Monad
 import cats.implicits._
 import io.daonomic.blockchain.Notify
 import io.daonomic.blockchain.state.State
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.language.higherKinds
 
 abstract class AbstractListenService[F[_]](confidence: Int, state: State[BigInteger, F])
                                           (implicit m: Monad[F]) {
+
+  protected val logger: Logger = LoggerFactory.getLogger(getClass)
+
   def check(blockNumber: BigInteger): F[Unit] = for {
     saved <- state.get
     _ <- fetchAndNotify(blockNumber, saved)
   } yield ()
 
   private def fetchAndNotify(blockNumber: BigInteger, saved: Option[BigInteger]): F[Unit] = {
+    logger.info(s"fetchAndNotify saved=$saved block=$blockNumber")
     val from = saved.getOrElse(blockNumber.subtract(BigInteger.ONE))
     val start = from.subtract(BigInteger.valueOf(confidence - 1))
     val numbers = blockNumbers(start, blockNumber)
