@@ -17,9 +17,11 @@ def tests(project: Project): Project = project
   .settings(libraryDependencies += "org.mockito" % "mockito-all" % Versions.mockito)
 
 lazy val listener = common(project)
+  .dependsOn(poller)
 
 lazy val `listener-mono` = common(project)
   .dependsOn(listener)
+  .dependsOn(`poller-mono`)
 
 lazy val poller = common(project)
 

@@ -4,14 +4,14 @@ import java.math.BigInteger
 
 import cats.Monad
 import cats.implicits._
-import io.daonomic.blockchain.Notify
+import io.daonomic.blockchain.poller.Notifier
 import io.daonomic.blockchain.state.State
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.language.higherKinds
 
 abstract class AbstractListenService[F[_]](confidence: Int, state: State[BigInteger, F])
-                                          (implicit m: Monad[F]) {
+                                          (implicit m: Monad[F], n: Notifier[F]) {
 
   protected val logger: Logger = LoggerFactory.getLogger(getClass)
 
@@ -26,18 +26,18 @@ abstract class AbstractListenService[F[_]](confidence: Int, state: State[BigInte
     val start = from.subtract(BigInteger.valueOf(confidence - 1))
     val numbers = blockNumbers(start, blockNumber)
     logger.info(s"will fetchAndNotify blocks: $numbers")
-    Notify.every(numbers) { num =>
+    n.notify(numbers) { num =>
       fetchAndNotify(blockNumber)(num.bigInteger).flatMap(_ => state.set(num.bigInteger))
     }
   }
 
-  private def blockNumbers(from: BigInteger, to: BigInteger): Seq[BigInt] = {
-    if (from.compareTo(to) >= 0)
+  private def blockNumbers(from: BigInt, to: BigInt): Seq[BigInt] = {
+    if (from > to)
       Nil
-    else if (from.compareTo(BigInteger.ZERO) < 0)
-      BigInt(BigInteger.ZERO) to to
+    else if (from < 0)
+      BigInt(0) to to
     else
-      BigInt(from) to to
+      from to to
   }
 
   protected def fetchAndNotify(latestBlock: BigInteger)(block: BigInteger): F[Unit]
